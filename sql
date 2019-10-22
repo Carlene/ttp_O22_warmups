@@ -127,8 +127,37 @@ FROM film as f
 WHERE f.film_id IN (SELECT film_id FROM films_list) AND
 WHERE fa.actor_id != (SELECT actor_id FROM top_actor); 
   
-  
-  
+ 
+-- FIX
+
+WITH top_actor AS (
+SELECT a.actor_id, COUNT(*)
+FROM film_actor as fa
+	JOIN film as f ON fa.film_id=f.film_id
+	JOIN actor as a ON fa.actor_id=a.actor_id
+GROUP BY a.actor_id
+ORDER BY COUNT(*) DESC
+--Adding a limit to get one result
+LIMIT 1) 
+,
+films_list AS (
+SELECT f.film_id, fa.actor_id
+FROM film as f
+JOIN film_actor as fa ON f.film_id = fa.film_id
+WHERE fa.actor_id = (SELECT actor_id FROM top_actor)
+)
+
+SELECT DISTINCT fa.actor_id, CONCAT(a.first_name, ' ', a.last_name) as name 
+-- Fixed combination of first and last name
+FROM film as f
+	JOIN film_actor as fa ON f.film_id=fa.film_id
+	JOIN actor as a ON a.actor_id=fa.actor_id
+WHERE f.film_id IN (SELECT film_id FROM films_list) AND
+-- Took out extra WHERE
+      fa.actor_id != (SELECT actor_id FROM top_actor); 
+
+---------------------------
+
 -- BONUS ROUND! Go through again, this time there's new errors!
 -- hint: 3 errors
 WITH with_holidays AS (
