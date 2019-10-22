@@ -27,6 +27,26 @@ SELECT *,
 	END as promo
 FROM with_holidays;
 
+--FIX
+
+WITH with_holidays AS (
+SELECT title, description, rental_rate,
+	CASE
+	-- Missing single quotes, wildcards, and ILIKE fo case insensitivity
+	WHEN title ILIKE '%halloween%' OR description ILIKE '%halloween%' THEN 'Halloween'
+	WHEN title ILIKE '%christmas%' OR description ILIKE '%christmas%' THEN 'Christmas' 
+	WHEN title ILIKE '%valentine%' OR description ILIKE '%valentine%' THEN 'Valentines_Day'
+	ELSE '' 
+	-- Missing end statement and alias
+	END as holiday
+FROM film
+ORDER BY holiday DESC, title)
+SELECT *,
+	CASE
+	WHEN holiday = '' THEN rental_rate
+	ELSE ROUND(rental_rate/2, 2)
+	END as promo
+FROM with_holidays;
 
 -----------------------------------
 
