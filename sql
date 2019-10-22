@@ -27,7 +27,7 @@ SELECT *,
 	END as promo
 FROM with_holidays;
 
---FIX
+-- FIX
 
 WITH with_holidays AS (
 SELECT title, description, rental_rate,
@@ -74,6 +74,33 @@ SELECT title, rental_rate,
 FROM film
 WHERE rating = 'PG-13';
 
+
+-- FIX
+
+WITH lowest_rate AS (
+SELECT DISTINCT rental_rate
+FROM film
+ORDER by rental_rate
+LIMIT 1
+)
+-- Missing comma
+,rate_next_above_1 AS (
+SELECT DISTINCT rental_rate
+FROM film
+WHERE rental_rate > 1
+ORDER by rental_rate
+LIMIT 1
+)
+
+SELECT title, rental_rate,
+	CASE
+-- Missing anything in the SELECT for the subqueries
+	WHEN rental_rate = (SELECT * FROM lowest_rate) THEN 0.10 
+	WHEN rental_rate = (SELECT * FROM rate_next_above_1) THEN 1 
+-- If the $4.99 price is supposed to be in the new_rate, need 'ELSE rental_rate'
+	END AS new_rate
+FROM film
+WHERE rating = 'PG-13';
 
 ---------------------------
 
