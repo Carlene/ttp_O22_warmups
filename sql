@@ -284,3 +284,30 @@ FROM film as f
 	JOIN actor as a 
 WHERE f.film_id IN (SELECT film_id FROM films_list) AND
 	fa.actor_id != (SELECT actor_id FROM top_actor);
+
+-- FIX
+
+WITH top_actor AS (
+SELECT a.actor_id, COUNT(*)
+FROM film_actor as fa
+	JOIN film as f ON fa.film_id=f.film_id
+	JOIN actor as a ON fa.actor_id=a.actor_id
+GROUP BY a.actor_id 
+-- Switched order of GROUP BY and ORDER BY
+ORDER BY COUNT(*) DESC 
+LIMIT 1)
+,
+films_list AS (
+SELECT f.film_id, fa.actor_id
+FROM film as f
+JOIN film_actor as fa ON f.film_id = fa.film_id
+WHERE fa.actor_id = (SELECT actor_id FROM top_actor)
+)
+
+SELECT DISTINCT fa.actor_id, a.first_name||' '||a.last_name as name
+FROM film as f
+-- Added ON statements for both JOINs
+	JOIN film_actor as fa ON f.film_id=fa.film_id
+	JOIN actor as a ON a.actor_id=fa.actor_id
+WHERE f.film_id IN (SELECT film_id FROM films_list) AND
+	fa.actor_id != (SELECT actor_id FROM top_actor);
